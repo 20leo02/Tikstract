@@ -22,7 +22,7 @@ def get_num_frames(video='final.mp4'):
     return num_frames
 
 
-num_frames = get_num_frames()
+frames = get_num_frames()
 
 
 def save_frames():
@@ -42,7 +42,7 @@ def save_frames():
         name = f'./image_frames/frame {idx}.jpg'
         cv2.imwrite(name, frame)
         idx += 1
-        if idx == num_frames:
+        if idx == frames:
             break
 
 
@@ -64,7 +64,7 @@ def read_frames(playlist, idx=0):
      :type idx: int
      """
 
-    if idx > num_frames-1:
+    if idx > frames-1:
         return playlist
 
     img = f'./image_frames/frame {idx}.jpg'
@@ -77,7 +77,7 @@ def read_frames(playlist, idx=0):
         li.remove('')
 
     if len(li)<2:
-        if idx <= num_frames-1:
+        if idx <= frames-1:
             return read_frames(playlist, idx=idx + 1)
         elif len(li)<1:
             return playlist
@@ -109,15 +109,15 @@ def text_cleanup(text):
     return text
 
 
-# img = "./image_frames/frame 17.jpg"
-# t = (pytesseract.image_to_string(img,
-#                                  config=f"-c tessedit_char_whitelist={whitelist}")).strip()
-# t = text_cleanup(t)
-# print(t)
+img = "./image_frames/frame 17.jpg"
+t = (pytesseract.image_to_string(img,
+                                 config=f"-c tessedit_char_whitelist={whitelist}")).strip()
+t = text_cleanup(t)
+print(t)
 
-# print(read_frames())
+
 # playlist = {}
 # play = read_frames(playlist)
 # print(play)
 # print(len(play))
-#
+# #

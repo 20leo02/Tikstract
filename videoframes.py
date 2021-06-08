@@ -1,4 +1,5 @@
-import subprocess, os
+import subprocess
+import os
 
 
 def apply_edits(video):
@@ -53,5 +54,5 @@ def remove_intermediates():
     os.remove('output.mp4')
     os.remove('output2.mp4')
 
-video = 'TT8.mp4'
+video = 'tiktok1.mp4'
 apply_edits(video)
