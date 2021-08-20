@@ -89,7 +89,7 @@ class SpotifyClient:
 
         response = requests.post(
             url,
-            data = data,
+            data=data,
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.auth_token}"}

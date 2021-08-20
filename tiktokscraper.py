@@ -1,49 +1,71 @@
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium import webdriver
-import sys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+import requests
 
 
-def extract_video_url(tiktok_url):
-    """Extracts a URL directing to an isolated TikTok video, given a TikTok
-    URL.
-    :param tiktok_url: A URL leading to a TikTok video
-    :type tiktok_url: String
-    :returns
-    """
-    try:
-        page = urlopen(tiktok_url)
-    except:
-        sys.exit("Error opening the URL.")
+def init_driver():
+    """Initializes driver."""
+    opts = FirefoxOptions()
 
-    soup = BeautifulSoup(page, 'html.parser')
-    content = soup.findAll("div")
-    # video_url = content.find("video").get("src")
-    print(content)
+    opts.add_argument("--headless")
+    opts.add_argument("--test-type")
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--no-first-run")
+    opts.add_argument("--no-default-browser-check")
+    opts.add_argument("--incognito")
+    opts.add_argument("--start-maximized")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('window-size=1920,1080')
+    opts.add_argument('--ignore-certificate-errors')
+    opts.add_argument('--allow-running-insecure-content')
+    opts.add_argument('--disable-dev-shm-usage')
+    opts.add_argument('--disable-extensions')
+    opts.add_argument('disable-infobars')
 
-    # return url
+    firefoxpath = '/Users/leo/browser/geckodriver'
+    driver = webdriver.Firefox(options=opts, executable_path=firefoxpath)
+    return driver
 
-def get_tiktok(url):
-    pass
+def download_tiktok(link):
+    """Downloads the tiktok.
+    :param link: URL to the tiktok
+    :type link: String"""
+    driver = init_driver()
 
+    X_PATH_TT = '//span[1]//div[1]//div[1]//div[5]//div[1]//div[1]//div[1]//span[2]'
+    driver.get(link)
 
-url = "https://www.tiktok.com/@vinsmoke.marcus/video/6971563278279380229?lang=en&is_copy_url=1&is_from_webapp=v1"
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, X_PATH_TT)))
+    tiktok = driver.find_element(By.XPATH, X_PATH_TT)
+    prevSibling = tiktok.find_element_by_xpath('.//preceding-sibling::*')
+    downloadlink = prevSibling.get_attribute('src')
+    driver.close()
 
-options = webdriver.ChromeOptions()
-options.add_argument('--ignore-certificate-errors')
-options.add_argument('--incognito')
-options.add_argument('--headless')
-driver = webdriver.Chrome(chrome_options=options)
-driver.get(url)
+    r = requests.head(link)
+    cookies = r.cookies.get_dict()
 
-assert "TikTok" in driver.title
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "max-age=0",
+        "Connection": "keep-alive",
+        "Host": "v16-web.tiktok.com",
+        "sec-ch-ua": '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+        "sec-ch-ua-mobile": "?0",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+        "Referer": f"{link}"}
 
-try:
-    page = urlopen(url)
-except:
-    sys.exit("Error opening the URL.")
-
-soup = BeautifulSoup(page, 'html.parser')
-content = soup.find_all("div")
-# video_url = content.find("video").get("src")
-print(content)
+    r = requests.get(downloadlink, headers=headers,cookies=cookies)
+    with open('tiktok.mp4', 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
