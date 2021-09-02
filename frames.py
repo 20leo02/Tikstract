@@ -1,12 +1,6 @@
 import os, subprocess, pytesseract, cv2
 
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-
-pytesseract.pytesseract.tesseract_cmd = \
-    'C:/Users/leora/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 
 
 
@@ -23,11 +17,8 @@ def get_num_frames(video='final.mp4'):
     return num_frames
 
 
-
-
-
 def save_frames():
-    frames = get_num_frames()
+    frames = 30
     """Saves frames from the final video into the image_frames folder in the
     directory.
     """
@@ -62,13 +53,13 @@ def get_tracks(playlist, idx=0):
      :param idx: Integer representing frame index, starting from 0.
      :type idx: int
      """
-    frames = get_num_frames()
+    frames = 30
     if idx > frames - 1:
         return playlist
 
-    img = f'C:/Users/leora/PycharmProjects/spotifyReader/image_frames/frame {idx}.jpg'
+    img = f'./image_frames/frame {idx}.jpg'
 
-    text=pytesseract.image_to_string(img, config=f"-c tessedit_char_whitelist={whitelist}")
+    text = pytesseract.image_to_string(img, config=f"-c tessedit_char_whitelist={whitelist}")
     text = text_cleanup(text)
     li = text.splitlines()
     if '' in li:
@@ -81,7 +72,6 @@ def get_tracks(playlist, idx=0):
             return playlist
 
     playlist[li[0]] = li[1]
-    # print(playlist)
 
     return get_tracks(playlist, idx=idx + 1)
 
